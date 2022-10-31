@@ -1,0 +1,23 @@
+class DojoModel {
+  constructor(id, name, address, capacity, active, schedules) {
+    this.id = id;
+    this.name = name;
+    this.address = address;
+    this.capacity = capacity;
+    this.active = active;
+    this.schedules = schedules;
+  }
+}
+
+class ScheduleModel {
+  constructor(id, day, startTime, endTime, count, active) {
+    this.id = id;
+    this.day = day;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.count = count;
+    this.active = active;
+  }
+}
+
+module.exports = { DojoModel, ScheduleModel };
