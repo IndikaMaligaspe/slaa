@@ -10,6 +10,8 @@ const {
   deleteScheduleInDojo,
   // ----------Attendance-------------------
   addNewAttendance,
+  updateExistingAttendance,
+  deleteExistingAttendance,
 } = require("../controllers/DojoContoroller");
 const validateRequest = require("../middleware/preValidateRequests");
 
@@ -230,58 +232,50 @@ router.post(
   }
 );
 
-router.put("/:id/schedules", validateRequest, async (req, res) => {
-  if (!req.body) {
-    res.status(400).send();
-    return;
-  }
-  const _id = req.params.id;
-  const reqSchedules = req.body.schedules;
+router.put(
+  "/:dojo/schedules/:schedule/attendance/:id",
+  validateRequest,
+  async (req, res) => {
+    if (!req.body) {
+      res.status(400).send();
+      return;
+    }
+    const _dojo = req.params.dojo;
+    const _schedule = req.params.schedule;
+    const _id = req.params.id;
+    const reqAttendance = req.body.attendance;
 
-  let schedules = new Array();
-  reqSchedules.forEach((_schedule) => {
-    const schedule = new ScheduleModel(
-      _schedule.id,
-      _schedule.day,
-      _schedule.startTime,
-      _schedule.endTime,
-      _schedule.count,
-      _schedule.active
+    const attendance = new AttendanceModel(
+      null,
+      _dojo,
+      _schedule,
+      reqAttendance.date,
+      reqAttendance.members
     );
-    schedules.push(schedule);
-  });
 
-  try {
-    const updatedSchedule = await updateScheduleToDojo(schedules, _id);
-    res.jsonp(updatedSchedule);
-  } catch (err) {
-    res.status(500).send(err.message);
+    try {
+      const status = await updateExistingAttendance(attendance, _id);
+      if (status) res.status(200).jsonp(status);
+      else res.status(404).send();
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
   }
-});
+);
 
-router.delete("/:id/schedules", validateRequest, async (req, res) => {
-  const _id = req.params.id;
-  const reqSchedules = req.body.schedules;
-
-  let schedules = new Array();
-  reqSchedules.forEach((_schedule) => {
-    const schedule = new ScheduleModel(
-      _schedule.id,
-      _schedule.day,
-      _schedule.startTime,
-      _schedule.endTime,
-      _schedule.count,
-      _schedule.active
-    );
-    schedules.push(schedule);
-  });
-
-  try {
-    const deletedSchedule = await deleteScheduleInDojo(schedules, _id);
-    res.jsonp(deletedSchedule);
-  } catch (err) {
-    res.status(500).send(err.message);
+router.delete(
+  "/:dojo/schedules/:schedule/attendance/:id",
+  validateRequest,
+  async (req, res) => {
+    const _id = req.params.id;
+    try {
+      const deleted = await deleteExistingAttendance(_id);
+      if (!deleted) res.status(404).send();
+      else res.jsonp(deleted);
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
   }
-});
+);
 
 module.exports = router;

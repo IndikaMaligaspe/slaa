@@ -1,3 +1,4 @@
+const { AttendanceModel } = require("../models/DojoModel");
 const {
   createDojo,
   updateDojo,
@@ -12,6 +13,8 @@ const {
 
   // -------- Attendance ---------
   addAttendance,
+  updateAttendance,
+  deleteAttendance,
 } = require("../services/DojoService");
 
 async function getDojoById(_id) {
@@ -156,12 +159,56 @@ async function addNewAttendance(attendanceModels, _dojoId, _scheduleId) {
   return new Promise(async (resolve, reject) => {
     try {
       let newAttendance = new Array();
-      attendanceModels.forEach((_attendance) => {
-        addAttendance(_attendance, _dojoId, _scheduleId).then((newAtt) => {
-          newAttendance.push(newAtt);
+      for (const _attendance in attendanceModels) {
+        await addAttendance(
+          attendanceModels[_attendance],
+          _dojoId,
+          _scheduleId
+        ).then((newAtt) => {
+          const attendance = new AttendanceModel(
+            newAtt._id,
+            newAtt.dojoId,
+            newAtt.scheduleId,
+            newAtt.date,
+            newAtt.members
+          );
+          newAttendance.push(attendance);
         });
-      });
+      }
       resolve(newAttendance);
+    } catch (err) {
+      reject(`Error in adding new Attendance : ${err} !`);
+    }
+  });
+}
+
+async function updateExistingAttendance(attendanceModels, _id) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await updateAttendance(attendanceModels, _id).then((updatedAtt) => {
+        if (!updatedAtt) resolve(false);
+        const attendance = new AttendanceModel(
+          updatedAtt._id,
+          updatedAtt.dojoId,
+          updatedAtt.scheduleId,
+          updatedAtt.date,
+          updatedAtt.members
+        );
+        resolve(attendance);
+      });
+    } catch (err) {
+      reject(`Error in adding new Attendance : ${err} !`);
+    }
+  });
+}
+
+async function deleteExistingAttendance(_id) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await deleteAttendance(_id).then((deleted) => {
+        if (!deleted) resolve(false);
+        resolve(deleted);
+      });
     } catch (err) {
       reject(`Error in adding new Attendance : ${err} !`);
     }
@@ -180,4 +227,6 @@ module.exports = {
   deleteScheduleInDojo,
   // --------- Attendance -----------
   addNewAttendance,
+  updateExistingAttendance,
+  deleteExistingAttendance,
 };

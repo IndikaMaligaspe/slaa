@@ -1,4 +1,3 @@
-const { DojoModel } = require("../models/DojoModel");
 const DojoSchama = require("../schemas/Mongo/DojoSchema");
 const AttandanceSchema = require("../schemas/Mongo/AttandanceSchema");
 
@@ -114,7 +113,38 @@ async function addAttendance(attendance, dojoId, scheduleId) {
       });
 
       const response = await attandance.save();
-      console.log(response);
+      resolve(response);
+    } catch (err) {
+      reject(new Error(`Error saving attendacne ${err.message} !`));
+    }
+  });
+}
+
+async function updateAttendance(attendance, _id) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const exists = await AttandanceSchema.isAttendanceExist(_id);
+      console.log(exists);
+      if (!exists) {
+        resolve(false);
+      }
+      const attandanceSchema = new AttandanceSchema();
+      const response = await attandanceSchema.updateAttandance(attendance, _id);
+      resolve(response);
+    } catch (err) {
+      reject(new Error(`Error saving attendacne ${err.message} !`));
+    }
+  });
+}
+
+async function deleteAttendance(_id) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const attendance = await AttandanceSchema.findById(_id);
+      if (!attendance) {
+        resolve(false);
+      }
+      const response = await attendance.delete({ _id: _id });
       resolve(response);
     } catch (err) {
       reject(new Error(`Error saving attendacne ${err.message} !`));
@@ -136,4 +166,6 @@ module.exports = {
 
   // ----------- Attendance ----------------------
   addAttendance,
+  updateAttendance,
+  deleteAttendance,
 };
