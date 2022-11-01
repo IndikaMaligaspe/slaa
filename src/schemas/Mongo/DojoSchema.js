@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+// mongoose.set("debug", true);
+
 const DojoSchema = new Schema({
   name: String,
   address: String,
@@ -72,6 +74,22 @@ DojoSchema.static("isDojoExisting", async function (dojoName) {
   const model = await mongoose.model("Dojo").find({ name: dojoName });
   return model ? true : false;
 });
+
+DojoSchema.static(
+  "isDojoAndScheduleExists",
+  async function (dojoId, scheduleId) {
+    var match = {
+      _id: mongoose.Types.ObjectId(dojoId),
+      "schedules._id": mongoose.Types.ObjectId(scheduleId),
+    };
+    const model = await mongoose
+      .model("Dojo")
+      .aggregate()
+      .unwind("schedules")
+      .match(match);
+    return model.length > 0;
+  }
+);
 
 DojoSchema.static("findDojoByName", async function (dojoName) {
   const model = await mongoose.model("Dojo").find({ name: dojoName });

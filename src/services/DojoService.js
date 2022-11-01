@@ -1,5 +1,6 @@
 const { DojoModel } = require("../models/DojoModel");
-const DojoSchama = require("../schemas/Mongo/DojoSchama");
+const DojoSchama = require("../schemas/Mongo/DojoSchema");
+const AttandanceSchema = require("../schemas/Mongo/AttandanceSchema");
 
 async function createDojo(dojoModel) {
   return new Promise(async (resolve, reject) => {
@@ -93,6 +94,34 @@ async function deleteSchedule(scheduleModel, _id) {
   });
 }
 
+// ---------------- Attandance ---------------
+async function addAttendance(attendance, dojoId, scheduleId) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const exists = await DojoSchama.isDojoAndScheduleExists(
+        dojoId,
+        scheduleId
+      );
+      if (!exists) {
+        reject(new Error(`Dojo for ${_id} not found!`));
+        return;
+      }
+      const attandance = new AttandanceSchema({
+        dojoId: dojoId,
+        scheduleId: scheduleId,
+        date: attendance.date,
+        members: attendance.members,
+      });
+
+      const response = await attandance.save();
+      console.log(response);
+      resolve(response);
+    } catch (err) {
+      reject(new Error(`Error saving attendacne ${err.message} !`));
+    }
+  });
+}
+
 module.exports = {
   createDojo,
   updateDojo,
@@ -104,4 +133,7 @@ module.exports = {
   addNewSchedule,
   updateSchedule,
   deleteSchedule,
+
+  // ----------- Attendance ----------------------
+  addAttendance,
 };

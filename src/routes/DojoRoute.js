@@ -8,10 +8,16 @@ const {
   addNewScheduleToDojo,
   updateScheduleToDojo,
   deleteScheduleInDojo,
+  // ----------Attendance-------------------
+  addNewAttendance,
 } = require("../controllers/DojoContoroller");
 const validateRequest = require("../middleware/preValidateRequests");
 
-const { DojoModel, ScheduleModel } = require("../models/DojoModel");
+const {
+  DojoModel,
+  ScheduleModel,
+  AttendanceModel,
+} = require("../models/DojoModel");
 
 const express = require("express"),
   router = express.Router();
@@ -134,6 +140,95 @@ router.post("/:id/schedules", validateRequest, async (req, res) => {
     res.status(500).send(err.message);
   }
 });
+
+router.put("/:id/schedules", validateRequest, async (req, res) => {
+  if (!req.body) {
+    res.status(400).send();
+    return;
+  }
+  const _id = req.params.id;
+  const reqSchedules = req.body.schedules;
+
+  let schedules = new Array();
+  reqSchedules.forEach((_schedule) => {
+    const schedule = new ScheduleModel(
+      _schedule.id,
+      _schedule.day,
+      _schedule.startTime,
+      _schedule.endTime,
+      _schedule.count,
+      _schedule.active
+    );
+    schedules.push(schedule);
+  });
+
+  try {
+    const updatedSchedule = await updateScheduleToDojo(schedules, _id);
+    res.jsonp(updatedSchedule);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+router.delete("/:id/schedules", validateRequest, async (req, res) => {
+  const _id = req.params.id;
+  const reqSchedules = req.body.schedules;
+
+  let schedules = new Array();
+  reqSchedules.forEach((_schedule) => {
+    const schedule = new ScheduleModel(
+      _schedule.id,
+      _schedule.day,
+      _schedule.startTime,
+      _schedule.endTime,
+      _schedule.count,
+      _schedule.active
+    );
+    schedules.push(schedule);
+  });
+
+  try {
+    const deletedSchedule = await deleteScheduleInDojo(schedules, _id);
+    res.jsonp(deletedSchedule);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+// -------------------Attendance ------------------------------
+
+router.post(
+  "/:dojo/schedules/:schedule/attendance",
+  validateRequest,
+  async (req, res) => {
+    if (!req.body) {
+      res.status(400).send();
+      return;
+    }
+    const _dojo = req.params.dojo;
+    const _schedule = req.params.schedule;
+    const reqAttendance = req.body.attendance;
+
+    let attendance = new Array();
+    reqAttendance.forEach((_att) => {
+      const att = new AttendanceModel(
+        null,
+        _dojo,
+        _schedule,
+        _att.date,
+        _att.members
+      );
+      attendance.push(att);
+    });
+
+    try {
+      const status = await addNewAttendance(attendance, _dojo, _schedule);
+      res.status(201).jsonp(status);
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
+  }
+);
 
 router.put("/:id/schedules", validateRequest, async (req, res) => {
   if (!req.body) {

@@ -5,10 +5,13 @@ const {
   isDojoExisting,
   findDojoById,
   findDojos,
-  // ----------Schedules ------------
+  // ---------- Schedules ------------
   addNewSchedule,
   updateSchedule,
   deleteSchedule,
+
+  // -------- Attendance ---------
+  addAttendance,
 } = require("../services/DojoService");
 
 async function getDojoById(_id) {
@@ -148,14 +151,33 @@ async function deleteScheduleInDojo(scheduleModels, _id) {
   });
 }
 
+// ---------------- Attendance  --------------
+async function addNewAttendance(attendanceModels, _dojoId, _scheduleId) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let newAttendance = new Array();
+      attendanceModels.forEach((_attendance) => {
+        addAttendance(_attendance, _dojoId, _scheduleId).then((newAtt) => {
+          newAttendance.push(newAtt);
+        });
+      });
+      resolve(newAttendance);
+    } catch (err) {
+      reject(`Error in adding new Attendance : ${err} !`);
+    }
+  });
+}
+
 module.exports = {
   createNewDojo,
   updateExistingDojo,
   deleteExistingDojo,
   getAllDojos,
   getDojoById,
-  // -----------Schedules ------------
+  // ----------- Schedules ------------
   addNewScheduleToDojo,
   updateScheduleToDojo,
   deleteScheduleInDojo,
+  // --------- Attendance -----------
+  addNewAttendance,
 };

@@ -20,4 +20,14 @@ class ScheduleModel {
   }
 }
 
-module.exports = { DojoModel, ScheduleModel };
+class AttendanceModel {
+  constructor(id, dojo, schedule, date, members) {
+    this.id = id;
+    this.dojo = dojo;
+    this.schedule = schedule;
+    this.date = date;
+    this.members = members;
+  }
+}
+
+module.exports = { DojoModel, ScheduleModel, AttendanceModel };
