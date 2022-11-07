@@ -12,6 +12,18 @@ const PaymentSchema = new Schema({
   dojo_id: mongoose.SchemaTypes.ObjectId,
 });
 
+PaymentSchema.methods("createPayment", async function () {
+  if (!this.ledgerId) {
+    this.ledgerId = await mongoose
+      .model("PaymentLedger")
+      .find()
+      .sort({ $natural: -1 })
+      .limit(1);
+  }
+  const response = this.save();
+  return response;
+});
+
 PaymentSchema.static("getSQLedgerId", async function () {
   const model = await mongoose
     .model("PaymentLedger")
@@ -22,22 +34,38 @@ PaymentSchema.static("getSQLedgerId", async function () {
 });
 
 PaymentSchema.static("findPaymentsByDate", async function (_date) {
-  const model = await mongoose.model("Payment").find({ date: _date });
+  const model = await mongoose
+    .model("Payment")
+    .find({ date: _date })
+    .sort({ $natural: -1 })
+    .limit(1);
   return model;
 });
 
 PaymentSchema.static("findPaymentByLedgerId", async function (ledgerId) {
-  const model = await mongoose.model("Payment").find({ ledger_id: ledgerId });
+  const model = await mongoose
+    .model("Payment")
+    .find({ ledger_id: ledgerId })
+    .sort({ $natural: -1 })
+    .limit(1);
   return model;
 });
 
 PaymentSchema.static("findPaymentsByPayee", async function (payeeId) {
-  const model = await mongoose.model("Payment").find({ payee_id: payeeId });
+  const model = await mongoose
+    .model("Payment")
+    .find({ payee_id: payeeId })
+    .sort({ $natural: -1 })
+    .limit(1);
   return model;
 });
 
 PaymentSchema.static("findPaymentsByDojo", async function (dojoId) {
-  const model = await mongoose.model("Payment").find({ dojo_id: dojoId });
+  const model = await mongoose
+    .model("Payment")
+    .find({ dojo_id: dojoId })
+    .sort({ $natural: -1 })
+    .limit(1);
   return model;
 });
 
