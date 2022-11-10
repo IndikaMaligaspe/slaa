@@ -64,7 +64,7 @@ async function updateMember(memberModel, _id) {
 }
 
 async function deleteMember(_id) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     findMemberById(_id)
       .then((member) => {
         if (member) {
@@ -73,14 +73,14 @@ async function deleteMember(_id) {
               resolve(response);
             })
             .catch((err) => {
-              reject(new Error(`Error in deleting member : ${err} !`));
+              reject(new Error(`Error in deleting member : ${err.message} !`));
             });
         } else {
-          reject(new Error(`Membr with ${member.email} does not exist !`));
+          reject(new Error(`Membr with ${_id} does not exist !`));
         }
       })
       .catch((err) => {
-        reject(new Error(`Error in updating ${err} !`));
+        reject(new Error(`Error in updating ${err.message} !`));
       });
   });
 }

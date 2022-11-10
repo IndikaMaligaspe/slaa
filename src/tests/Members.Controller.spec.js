@@ -15,10 +15,6 @@ let memberController = rewire("../controllers/MemberController");
 let savedMember;
 
 let memberServiceMock = {
-  // createNewMember,
-  // isMemberExisting,
-  // updateExistingMemeber,
-  // deleteExistingMember,
   findMemberById: function (_id) {
     return new Promise((resolve) => {
       const m = members.find((m) => {
@@ -56,6 +52,26 @@ let memberServiceMock = {
       resolve(savedMember);
     });
   },
+  updateExistingMemeber: function (memberModel, _id) {
+    return new Promise((resolve) => {
+      savedMember = new MemberSchema({
+        name: memberModel.name,
+        address: memberModel.address,
+        dateOfBirth: memberModel.dateOfBirth,
+        mobile: memberModel.mobile,
+        email: memberModel.email,
+        dateOfJoin: memberModel.dateOfJoin,
+        gradings: memberModel.gradings,
+        isInstructor: memberModel.isInstructor,
+      });
+      resolve(savedMember);
+    });
+  },
+  deleteExistingMember: function (_id) {
+    return new Promise((resolve) => {
+      resolve(true);
+    });
+  },
 };
 
 memberController.__set__("findMemberById", memberServiceMock.findMemberById);
@@ -65,6 +81,14 @@ memberController.__set__(
   memberServiceMock.isMemberExisting
 );
 memberController.__set__("createNewMember", memberServiceMock.createNewMember);
+memberController.__set__(
+  "updateExistingMemeber",
+  memberServiceMock.updateExistingMemeber
+);
+memberController.__set__(
+  "deleteExistingMember",
+  memberServiceMock.deleteExistingMember
+);
 
 describe("members /", () => {
   describe("get member with specific ID /id", () => {
@@ -154,6 +178,101 @@ describe("members /", () => {
         // Then
         expect(error).is.equal(`Membr with ${member.email} already existing !`);
         expect(actualResult).is.equal(undefined);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+  });
+  describe("update an existing member", () => {
+    it("update a new member with correct data when member existing", async () => {
+      try {
+        // given
+        let member = new MemberModel(
+          null,
+          "Indika",
+          "Test Address",
+          "1977-10-10",
+          "999999",
+          "indika123@kkk.lk",
+          "2002-10-10",
+          [],
+          true
+        );
+
+        // When
+        const actualResult = await memberController.updateMember(member, 1);
+
+        // Then
+        expect(actualResult.id).is.not.null;
+        expect(actualResult.name).to.equal(savedMember.name);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+    it("Error when trying to update a member with correct data when member not existing", async () => {
+      try {
+        // given
+        let member = new MemberModel(
+          null,
+          "Indika",
+          "Test Address",
+          "1977-10-10",
+          "999999",
+          "indika123@kkk.lk",
+          "2002-10-10",
+          [],
+          true
+        );
+
+        // When
+        let error;
+        let actualResult;
+        try {
+          actualResult = await memberController.updateMember(member, 10);
+        } catch (err) {
+          error = err.message;
+        }
+
+        // Then
+        expect(error).is.equal(`Membr with ${member.email} does not exist !`);
+        expect(actualResult).is.equal(undefined);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+  });
+
+  describe("delete an existing member", () => {
+    it("delete a member with correct data when member existing", async () => {
+      try {
+        // given
+        let _id = 1;
+
+        // When
+        const actualResult = await memberController.deleteMember(_id);
+
+        // Then
+        expect(actualResult).is.equal(true);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+    it("Error when trying to delete a member with correct data when member not existing", async () => {
+      try {
+        // given
+        let id = 10;
+
+        // When
+        let error;
+        let actualResult;
+        try {
+          actualResult = await memberController.deleteMember(id);
+        } catch (err) {
+          error = err.message;
+        }
+
+        // Then
+        expect(error).is.equal(`Membr with ${id} does not exist !`);
       } catch (err) {
         console.log(err);
       }
