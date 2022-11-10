@@ -15,9 +15,9 @@ const PaymentSchema = new Schema({
 PaymentSchema.methods("createPayment", async function () {
   if (!this.ledgerId) {
     this.ledgerId = await mongoose
-      .model("PaymentLedger")
-      .find()
-      .sort({ $natural: -1 })
+      .model("Payment")
+      .find({}, { ledger_id: 1 })
+      .sort({ ledger_id: -1 })
       .limit(1);
   }
   const response = this.save();
@@ -26,9 +26,9 @@ PaymentSchema.methods("createPayment", async function () {
 
 PaymentSchema.static("getSQLedgerId", async function () {
   const model = await mongoose
-    .model("PaymentLedger")
-    .find()
-    .sort({ $natural: -1 })
+    .model("Payment")
+    .find({}, { ledger_id: 1 })
+    .sort({ ledger_id: -1 })
     .limit(1);
   return model;
 });
@@ -65,6 +65,16 @@ PaymentSchema.static("findPaymentsByDojo", async function (dojoId) {
     .model("Payment")
     .find({ dojo_id: dojoId })
     .sort({ $natural: -1 })
+    .limit(1);
+  return model;
+});
+
+PaymentSchema.static("findAllPayments", async function (djoId) {
+  const model = await mongoose
+    .model("Payment")
+    .aggregate()
+    .sort({ ledger_id: -1 })
+    .group({ _id: "ledger_id", ledger_id: $last })
     .limit(1);
   return model;
 });

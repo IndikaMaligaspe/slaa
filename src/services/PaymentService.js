@@ -50,8 +50,16 @@ async function findPaymentsByPayee(payee) {
   });
 }
 
+async function findAllPayments() {
+  return new Promise(async (resolve) => {
+    const response = await PaymentSchema.findAllPayments();
+    resolve(response);
+  });
+}
+
 module.exports = {
   createPayment,
+  findAllPayments,
   findPaymentByLedgerId,
   findPaymentsByDate,
   findPaymentsByDojo,

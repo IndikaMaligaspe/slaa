@@ -28,7 +28,8 @@ async function isMemberExisting(email, name) {
 async function findMemberById(_id) {
   return new Promise(async (resolve) => {
     const response = await MemberSchema.findById(_id);
-    resolve(response);
+    if (response) resolve(response);
+    else resolve(false);
   });
 }
 
